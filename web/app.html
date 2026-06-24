@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlassOS</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        /* Light theme (default) */
+        :root {
+            --bg:                  #ffffff;
+            --color:               #222222;
+            --border-heading:      #e0e0e0;
+            --color-muted:         #555555;
+            --color-subtle:        #6b7280;
+            --color-label:         #374151;
+            --color-hint:          #9ca3af;
+            --input-bg:            #ffffff;
+            --input-color:         #111111;
+            --input-border:        #d1d5db;
+            --input-focus-border:  #2563eb;
+            --input-focus-shadow:  rgba(37, 99, 235, 0.12);
+            --card-bg:             #f9fafb;
+            --card-border:         #e5e7eb;
+            --pre-bg:              #f6f8fa;
+            --pre-color:           #1f2328;
+            --pre-border:          #dde1e7;
+            --alert-ok-bg:         #f0fdf4;
+            --alert-ok-border:     #22c55e;
+            --alert-ok-color:      #15803d;
+            --alert-err-bg:        #fef2f2;
+            --alert-err-border:    #ef4444;
+            --alert-err-color:     #b91c1c;
+            --ap-bg:               #eff6ff;
+            --ap-border:           #bfdbfe;
+            --ap-h2:               #1d4ed8;
+            --ap-p:                #1e40af;
+            --toggle-track:        #d1d5db;
+        }
+
+        /* Dark theme via system preference */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg:                  #0d1117;
+                --color:               #e6edf3;
+                --border-heading:      #30363d;
+                --color-muted:         #8b949e;
+                --color-subtle:        #8b949e;
+                --color-label:         #c9d1d9;
+                --color-hint:          #6b7280;
+                --input-bg:            #161b22;
+                --input-color:         #e6edf3;
+                --input-border:        #30363d;
+                --input-focus-border:  #388bfd;
+                --input-focus-shadow:  rgba(56, 139, 253, 0.15);
+                --card-bg:             #161b22;
+                --card-border:         #30363d;
+                --pre-bg:              #161b22;
+                --pre-color:           #e6edf3;
+                --pre-border:          #30363d;
+                --alert-ok-bg:         #052e16;
+                --alert-ok-border:     #16a34a;
+                --alert-ok-color:      #86efac;
+                --alert-err-bg:        #450a0a;
+                --alert-err-border:    #dc2626;
+                --alert-err-color:     #fca5a5;
+                --ap-bg:               #0d1f38;
+                --ap-border:           #1e3a6e;
+                --ap-h2:               #79c0ff;
+                --ap-p:                #93c5fd;
+                --toggle-track:        #374151;
+            }
+        }
+
+        /* Dark theme forced via toggle */
+        html[data-theme="dark"] {
+            --bg:                  #0d1117;
+            --color:               #e6edf3;
+            --border-heading:      #30363d;
+            --color-muted:         #8b949e;
+            --color-subtle:        #8b949e;
+            --color-label:         #c9d1d9;
+            --color-hint:          #6b7280;
+            --input-bg:            #161b22;
+            --input-color:         #e6edf3;
+            --input-border:        #30363d;
+            --input-focus-border:  #388bfd;
+            --input-focus-shadow:  rgba(56, 139, 253, 0.15);
+            --card-bg:             #161b22;
+            --card-border:         #30363d;
+            --pre-bg:              #161b22;
+            --pre-color:           #e6edf3;
+            --pre-border:          #30363d;
+            --alert-ok-bg:         #052e16;
+            --alert-ok-border:     #16a34a;
+            --alert-ok-color:      #86efac;
+            --alert-err-bg:        #450a0a;
+            --alert-err-border:    #dc2626;
+            --alert-err-color:     #fca5a5;
+            --ap-bg:               #0d1f38;
+            --ap-border:           #1e3a6e;
+            --ap-h2:               #79c0ff;
+            --ap-p:                #93c5fd;
+            --toggle-track:        #374151;
+        }
+
+        /* Light theme forced via toggle (overrides dark system preference) */
+        html[data-theme="light"] {
+            --bg:                  #ffffff;
+            --color:               #222222;
+            --border-heading:      #e0e0e0;
+            --color-muted:         #555555;
+            --color-subtle:        #6b7280;
+            --color-label:         #374151;
+            --color-hint:          #9ca3af;
+            --input-bg:            #ffffff;
+            --input-color:         #111111;
+            --input-border:        #d1d5db;
+            --input-focus-border:  #2563eb;
+            --input-focus-shadow:  rgba(37, 99, 235, 0.12);
+            --card-bg:             #f9fafb;
+            --card-border:         #e5e7eb;
+            --pre-bg:              #f6f8fa;
+            --pre-color:           #1f2328;
+            --pre-border:          #dde1e7;
+            --alert-ok-bg:         #f0fdf4;
+            --alert-ok-border:     #22c55e;
+            --alert-ok-color:      #15803d;
+            --alert-err-bg:        #fef2f2;
+            --alert-err-border:    #ef4444;
+            --alert-err-color:     #b91c1c;
+            --ap-bg:               #eff6ff;
+            --ap-border:           #bfdbfe;
+            --ap-h2:               #1d4ed8;
+            --ap-p:                #1e40af;
+            --toggle-track:        #d1d5db;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 860px;
+            margin: 3rem auto;
+            padding: 0 1.5rem 4rem;
+            background: var(--bg);
+            color: var(--color);
+            line-height: 1.6;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-heading);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-reboot {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.8rem;
+            font-family: inherit;
+            font-weight: 500;
+            background: transparent;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .header-reboot:hover { background: #dc2626; color: #fff; }
+
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--toggle-track);
+            border-radius: 24px;
+            transition: background 0.2s;
+        }
+
+        .theme-slider::before {
+            content: "";
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        input:checked + .theme-slider { background: #334155; }
+        input:checked + .theme-slider::before { transform: translateX(18px); }
+
+        .subtitle {
+            color: var(--color-subtle);
+            font-size: 0.9rem;
+            margin: 0 0 2rem;
+        }
+
+        h2 {
+            font-size: 0.85rem;
+            margin: 2.5rem 0 0.5rem;
+            color: var(--color-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+        }
+
+        p { margin: 0.4rem 0 0.6rem; }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: var(--color-label);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="url"],
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            background: var(--input-bg);
+            color: var(--input-color);
+            margin-bottom: 0.75rem;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="url"]:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+
+        textarea {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            background: var(--input-bg);
+            color: var(--input-color);
+            margin-bottom: 0.75rem;
+            resize: vertical;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 3px var(--input-focus-shadow);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1.25rem;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        button:hover { background: #1d4ed8; }
+
+        button.secondary { background: #6b7280; }
+        button.secondary:hover { background: #4b5563; }
+
+        button.danger { background: #dc2626; }
+        button.danger:hover { background: #b91c1c; }
+
+        .btn-row {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.25rem;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin: 0.75rem 0;
+        }
+
+        .status-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+        }
+
+        .status-card .s-label {
+            font-size: 0.75rem;
+            color: var(--color-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .status-card .s-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+        }
+
+        .log-box {
+            font-size: 0.8rem;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            background: #101828;
+            color: #d1fae5;
+            border: 1px solid #1f2937;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            max-height: 380px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0.5rem 0 0.75rem;
+        }
+
+        pre {
+            font-size: 0.875rem;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            background: var(--pre-bg);
+            color: var(--pre-color);
+            border: 1px solid var(--pre-border);
+            border-radius: 6px;
+            padding: 0.875rem 1.25rem;
+            margin: 0.5rem 0 0.75rem;
+            overflow-x: auto;
+            max-height: 380px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .alert {
+            padding: 0.65rem 1rem;
+            border-radius: 6px;
+            margin: 0.6rem 0;
+            font-size: 0.875rem;
+        }
+
+        .alert-ok  {
+            background: var(--alert-ok-bg);
+            border-left: 3px solid var(--alert-ok-border);
+            color: var(--alert-ok-color);
+        }
+
+        .alert-err {
+            background: var(--alert-err-bg);
+            border-left: 3px solid var(--alert-err-border);
+            color: var(--alert-err-color);
+        }
+
+        .ap-banner {
+            background: var(--ap-bg);
+            border: 1px solid var(--ap-border);
+            border-radius: 10px;
+            padding: 1.5rem 1.75rem;
+            margin: 1.5rem 0 2rem;
+        }
+
+        .ap-banner h2 {
+            margin-top: 0;
+            font-size: 1rem;
+            color: var(--ap-h2);
+            text-transform: none;
+            letter-spacing: normal;
+        }
+
+        .ap-banner p {
+            margin: 0;
+            color: var(--ap-p);
+            font-size: 0.9rem;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: var(--color-hint);
+            margin: -0.2rem 0 0.6rem;
+        }
+
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--card-border);
+            margin: 1.75rem 0 0;
+            gap: 0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            padding: 0.55rem 1.1rem;
+            font-size: 0.875rem;
+            font-family: inherit;
+            font-weight: 500;
+            color: var(--color-muted);
+            cursor: pointer;
+            border-radius: 0;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .tab-btn:hover { color: var(--color); background: none; }
+
+        .tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        .asset-list {
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .asset-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.45rem 0.75rem;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.875rem;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+        }
+
+        .asset-item:last-child { border-bottom: none; }
+
+        .asset-item button {
+            padding: 0.2rem 0.6rem;
+            font-size: 0.75rem;
+        }
+
+        .asset-empty {
+            padding: 0.75rem;
+            color: var(--color-hint);
+            font-size: 0.875rem;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .status-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-header">
+    <h1>GlassOS</h1>
+    <div class="header-actions">
+        <button class="header-reboot" onclick="reboot()" title="Reboot device">Reboot</button>
+        <label class="theme-switch" title="Toggle dark mode" aria-label="Toggle dark mode">
+            <input type="checkbox" id="theme-check" onchange="applyTheme(this.checked)">
+            <span class="theme-slider"></span>
+        </label>
+    </div>
+</div>
+<p class="subtitle">Supervisor &mdash; {{.Host}}</p>
+
+<div id="reboot-result"></div>
+
+<div class="tabs">
+    <button class="tab-btn active" data-tab="status" onclick="showTab('status')">Status</button>
+    <button class="tab-btn" data-tab="update" onclick="showTab('update')">Update</button>
+    <button class="tab-btn" data-tab="files" onclick="showTab('files')">Files</button>
+</div>
+
+<div id="tab-status" class="tab-pane active">
+    <h2>Status</h2>
+    <div class="status-grid">
+        <div class="status-card">
+            <div class="s-label">PID</div>
+            <div class="s-value" id="status-pid">—</div>
+        </div>
+        <div class="status-card">
+            <div class="s-label">Restarts</div>
+            <div class="s-value" id="status-restarts">—</div>
+        </div>
+        <div class="status-card">
+            <div class="s-label">Uptime</div>
+            <div class="s-value" id="status-uptime">—</div>
+        </div>
+    </div>
+    <div class="btn-row">
+        <button class="secondary" onclick="loadStatus()">Refresh</button>
+    </div>
+    <div id="status-result"></div>
+
+    <h2>Logs</h2>
+    <div id="log-box" class="log-box">Press &#x201C;Load Logs&#x201D; to fetch recent output.</div>
+    <div class="btn-row">
+        <button class="secondary" onclick="fetchLogs()">Load Logs</button>
+        <button id="btn-stream" onclick="toggleStream()">Stream Logs</button>
+    </div>
+</div>
+
+<div id="tab-update" class="tab-pane">
+    <h2>Application Update</h2>
+    <p class="hint">Downloads the binary, verifies the SHA-256 checksum, replaces the binary, and restarts Glass.</p>
+    <label for="ota-url">Binary URL</label>
+    <input type="url" id="ota-url" placeholder="https://example.com/glass">
+    <label for="ota-sha256">SHA-256 Checksum</label>
+    <input type="text" id="ota-sha256" placeholder="hex-encoded SHA-256">
+    <button onclick="otaUpdate()">Apply Update</button>
+    <div id="ota-result"></div>
+
+    <h2>OS Update</h2>
+    <p class="hint">Downloads and installs a RAUC bundle. Reboot the device to activate the new slot.</p>
+    <label for="os-url">RAUC Bundle URL</label>
+    <input type="url" id="os-url" placeholder="https://example.com/glassos.raucb">
+    <button onclick="osUpdate()">Install OS Update</button>
+    <div id="os-result"></div>
+
+    <h2>OS Status</h2>
+    <pre id="os-status-pre">Press &#x201C;Fetch OS Status&#x201D; to display RAUC slot information.</pre>
+    <button class="secondary" onclick="loadOSStatus()">Fetch OS Status</button>
+</div>
+
+<div id="tab-files" class="tab-pane">
+    <h2>Glass</h2>
+    <p class="hint">Restart the Glass process to apply any pending configuration or asset changes.</p>
+    <button class="secondary" onclick="restartGlass()">Restart Glass</button>
+    <div id="restart-result"></div>
+
+    <h2>Configuration</h2>
+    <p class="hint">Edit and save <code>config.yaml</code>. Restart Glass to apply changes.</p>
+    <textarea id="config-editor" rows="12" placeholder="Loading&hellip;" spellcheck="false"></textarea>
+    <div class="btn-row">
+        <button onclick="saveConfig()">Save Config</button>
+        <button class="secondary" onclick="loadConfig()">Reload</button>
+    </div>
+    <div id="config-result"></div>
+
+    <h2>Secrets</h2>
+    <p class="hint">Upload <code>secrets.yaml</code>. Restart Glass to apply changes.</p>
+    <label for="secrets-file">secrets.yaml</label>
+    <input type="file" id="secrets-file" accept=".yaml,.yml">
+    <button onclick="uploadFile('secrets-file', '/glass/secrets', 'secrets-result')">Upload Secrets</button>
+    <div id="secrets-result"></div>
+
+    <h2>Assets</h2>
+    <p class="hint">Upload or remove files from the assets directory.</p>
+    <div id="asset-list" class="asset-list"></div>
+    <label for="asset-file" style="margin-top:0.5rem">Upload a file</label>
+    <input type="file" id="asset-file">
+    <div class="btn-row">
+        <button onclick="uploadAsset()">Upload Asset</button>
+    </div>
+    <div id="asset-result"></div>
+</div>
+
+<script>
+// --- Theme ---
+
+function currentlyDark() {
+    var t = document.documentElement.getAttribute('data-theme');
+    if (t === 'dark')  { return true; }
+    if (t === 'light') { return false; }
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function applyTheme(dark) {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+    updateToggleState();
+}
+
+function updateToggleState() {
+    var check = document.getElementById('theme-check');
+    if (!check) { return; }
+    check.checked = currentlyDark();
+}
+
+(function initTheme() {
+    var saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') {
+        document.documentElement.setAttribute('data-theme', saved);
+    }
+    updateToggleState();
+})();
+
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function showResult(id, ok, msg) {
+    var el = document.getElementById(id);
+    if (!el) { return; }
+    el.className = 'alert ' + (ok ? 'alert-ok' : 'alert-err');
+    el.textContent = msg;
+}
+
+// --- Status ---
+
+async function loadStatus() {
+    try {
+        var r = await fetch('/glass/status');
+        if (!r.ok) { showResult('status-result', false, 'Server returned ' + r.status); return; }
+        var d = await r.json();
+        document.getElementById('status-pid').textContent = d.pid || '—';
+        document.getElementById('status-restarts').textContent = (d.restarts !== undefined) ? d.restarts : '—';
+        document.getElementById('status-uptime').textContent = d.uptime || '—';
+    } catch (e) {
+        showResult('status-result', false, 'Failed to load status: ' + e.message);
+    }
+}
+
+// --- Logs ---
+
+var logStream = null;
+
+async function fetchLogs() {
+    var box = document.getElementById('log-box');
+    box.textContent = 'Loading\u2026';
+    try {
+        var r = await fetch('/glass/logs');
+        if (!r.ok) { box.textContent = 'Error: ' + r.status; return; }
+        var text = await r.text();
+        box.textContent = text || '(no output)';
+        box.scrollTop = box.scrollHeight;
+    } catch (e) {
+        box.textContent = 'Error: ' + e.message;
+    }
+}
+
+function toggleStream() {
+    var btn = document.getElementById('btn-stream');
+    if (logStream) {
+        logStream.abort();
+        logStream = null;
+        btn.textContent = 'Stream Logs';
+        btn.className = '';
+        return;
+    }
+    logStream = new AbortController();
+    btn.textContent = 'Stop Streaming';
+    btn.className = 'danger';
+    startLogStream(logStream.signal);
+}
+
+async function startLogStream(signal) {
+    var box = document.getElementById('log-box');
+    box.textContent = '';
+    var decoder = new TextDecoder();
+    try {
+        var r = await fetch('/glass/logs?follow=true', { signal: signal });
+        var reader = r.body.getReader();
+        for (;;) {
+            var chunk = await reader.read();
+            if (chunk.done) { break; }
+            box.textContent += decoder.decode(chunk.value, { stream: true });
+            box.scrollTop = box.scrollHeight;
+        }
+    } catch (e) {
+        if (e.name !== 'AbortError') {
+            box.textContent += '\n[stream ended: ' + e.message + ']';
+        }
+    }
+    logStream = null;
+    var btn = document.getElementById('btn-stream');
+    if (btn) { btn.textContent = 'Stream Logs'; btn.className = ''; }
+}
+
+// --- Helpers ---
+
+function sleep(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+async function checkStatus() {
+    try {
+        var r = await fetch('/glass/status', { signal: AbortSignal.timeout(2000) });
+        return r.ok;
+    } catch (e) {
+        return false;
+    }
+}
+
+// --- OTA ---
+
+async function otaUpdate() {
+    var url    = document.getElementById('ota-url').value.trim();
+    var sha256 = document.getElementById('ota-sha256').value.trim();
+    if (!url)    { showResult('ota-result', false, 'URL is required.'); return; }
+    if (!sha256) { showResult('ota-result', false, 'SHA-256 checksum is required.'); return; }
+    showResult('ota-result', true, 'Downloading and applying update \u2014 this may take a while\u2026');
+    try {
+        var r = await fetch('/glass/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: url, sha256: sha256 })
+        });
+        if (r.ok) {
+            showResult('ota-result', true, 'Update applied. Glass is restarting.');
+        } else {
+            var txt = await r.text();
+            showResult('ota-result', false, 'Error: ' + txt);
+        }
+    } catch (e) {
+        showResult('ota-result', false, 'Request failed: ' + e.message);
+    }
+}
+
+// --- File uploads ---
+
+async function uploadFile(fileInputId, endpoint, resultId) {
+    var file = document.getElementById(fileInputId).files[0];
+    if (!file) { showResult(resultId, false, 'No file selected.'); return; }
+    showResult(resultId, true, 'Uploading\u2026');
+    try {
+        var body = await file.arrayBuffer();
+        var r = await fetch(endpoint, { method: 'POST', body: body });
+        if (r.ok) {
+            showResult(resultId, true, 'Uploaded successfully.');
+        } else {
+            var txt = await r.text();
+            showResult(resultId, false, 'Error: ' + txt);
+        }
+    } catch (e) {
+        showResult(resultId, false, 'Request failed: ' + e.message);
+    }
+}
+
+async function uploadAsset() {
+    var file = document.getElementById('asset-file').files[0];
+    if (!file) { showResult('asset-result', false, 'No file selected.'); return; }
+    showResult('asset-result', true, 'Uploading\u2026');
+    try {
+        var body = await file.arrayBuffer();
+        var r = await fetch('/glass/assets/' + encodeURIComponent(file.name), { method: 'POST', body: body });
+        if (r.ok) {
+            showResult('asset-result', true, 'Asset "' + file.name + '" uploaded.');
+            document.getElementById('asset-file').value = '';
+            loadAssetList();
+        } else {
+            var txt = await r.text();
+            showResult('asset-result', false, 'Error: ' + txt);
+        }
+    } catch (e) {
+        showResult('asset-result', false, 'Request failed: ' + e.message);
+    }
+}
+
+async function deleteAsset(name) {
+    if (!confirm('Delete asset "' + name + '"?')) { return; }
+    try {
+        var r = await fetch('/glass/assets/' + encodeURIComponent(name), { method: 'DELETE' });
+        if (r.ok) {
+            showResult('asset-result', true, 'Asset "' + name + '" deleted.');
+            loadAssetList();
+        } else {
+            var txt = await r.text();
+            showResult('asset-result', false, 'Error: ' + txt);
+        }
+    } catch (e) {
+        showResult('asset-result', false, 'Request failed: ' + e.message);
+    }
+}
+
+// --- OS Update ---
+
+async function osUpdate() {
+    var url = document.getElementById('os-url').value.trim();
+    if (!url) { showResult('os-result', false, 'URL is required.'); return; }
+    showResult('os-result', true, 'Downloading and installing OS bundle \u2014 this may take several minutes\u2026');
+    try {
+        var r = await fetch('/os/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: url })
+        });
+        if (r.ok) {
+            showResult('os-result', true, 'OS update installed. Reboot the device to activate the new slot.');
+        } else {
+            var txt = await r.text();
+            showResult('os-result', false, 'Error: ' + txt);
+        }
+    } catch (e) {
+        showResult('os-result', false, 'Request failed: ' + e.message);
+    }
+}
+
+// --- OS Status ---
+
+async function loadOSStatus() {
+    var pre = document.getElementById('os-status-pre');
+    pre.textContent = 'Loading\u2026';
+    try {
+        var r = await fetch('/os/status');
+        if (!r.ok) { pre.textContent = 'Error: ' + r.status; return; }
+        var d = await r.json();
+        pre.textContent = JSON.stringify(d, null, 2);
+    } catch (e) {
+        pre.textContent = 'Error: ' + e.message;
+    }
+}
+
+// --- Reboot ---
+
+async function reboot() {
+    if (!confirm('Reboot the device now?')) { return; }
+    try {
+        await fetch('/os/reboot', { method: 'POST' });
+        showResult('reboot-result', true, 'Reboot initiated. The device will be unavailable shortly.');
+    } catch (e) {
+        // The connection may close before a response arrives — treat as success.
+        showResult('reboot-result', true, 'Reboot command sent.');
+    }
+}
+
+// --- Glass Restart ---
+
+async function restartGlass() {
+    if (!confirm('Restart the Glass process now?')) { return; }
+    try {
+        var r = await fetch('/glass/restart', { method: 'POST' });
+        if (r.ok) {
+            showResult('restart-result', true, 'Glass is restarting.');
+        } else {
+            var txt = await r.text();
+            showResult('restart-result', false, 'Error: ' + txt);
+        }
+    } catch (e) {
+        showResult('restart-result', false, 'Request failed: ' + e.message);
+    }
+}
+
+// --- Config ---
+
+async function loadConfig() {
+    var ta = document.getElementById('config-editor');
+    ta.value = 'Loading\u2026';
+    try {
+        var r = await fetch('/glass/config');
+        if (r.status === 404) { ta.value = ''; return; }
+        if (!r.ok) {
+            ta.value = '';
+            showResult('config-result', false, 'Failed to load config: ' + r.status);
+            return;
+        }
+        ta.value = await r.text();
+    } catch (e) {
+        ta.value = '';
+        showResult('config-result', false, 'Failed to load config: ' + e.message);
+    }
+}
+
+async function saveConfig() {
+    var content = document.getElementById('config-editor').value;
+    showResult('config-result', true, 'Saving\u2026');
+    try {
+        var r = await fetch('/glass/config', { method: 'POST', body: content });
+        if (r.ok) {
+            showResult('config-result', true, 'Config saved. Restart Glass to apply changes.');
+        } else {
+            var txt = await r.text();
+            showResult('config-result', false, 'Error: ' + txt);
+        }
+    } catch (e) {
+        showResult('config-result', false, 'Request failed: ' + e.message);
+    }
+}
+
+// --- Asset list ---
+
+async function loadAssetList() {
+    var container = document.getElementById('asset-list');
+    if (!container) { return; }
+    try {
+        var r = await fetch('/glass/assets');
+        if (!r.ok) {
+            container.innerHTML = '<div class="asset-empty">Failed to load assets.</div>';
+            return;
+        }
+        var names = await r.json();
+        if (!names || names.length === 0) {
+            container.innerHTML = '<div class="asset-empty">No assets uploaded yet.</div>';
+            return;
+        }
+        container.innerHTML = names.map(function(name) {
+            return '<div class="asset-item">' +
+                '<span>' + escapeHtml(name) + '</span>' +
+                '<button class="danger" onclick="deleteAsset(\'' + escapeHtml(name) + '\')">Delete</button>' +
+                '</div>';
+        }).join('');
+    } catch (e) {
+        container.innerHTML = '<div class="asset-empty">Error: ' + escapeHtml(e.message) + '</div>';
+    }
+}
+
+// --- Files tab init ---
+
+function loadFilesTab() {
+    loadConfig();
+    loadAssetList();
+}
+
+// --- Tabs ---
+
+function showTab(id) {
+    document.querySelectorAll('.tab-pane').forEach(function(pane) {
+        pane.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-tab') === id);
+    });
+    document.getElementById('tab-' + id).classList.add('active');
+    if (id === 'files') { loadFilesTab(); }
+}
+
+// --- Init ---
+
+loadStatus();
+</script>
+</body>
+</html>
