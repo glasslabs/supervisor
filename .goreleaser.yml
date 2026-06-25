@@ -16,7 +16,7 @@ builds:
       - CGO_ENABLED=0
 
 archives:
-  - formats: ["binary"]
+  - formats: ["tar.gz"]
 
 changelog:
   disable: true
